@@ -1,0 +1,35 @@
+[
+  {
+    "model": "yolo11n-seg",
+    "seg_precision": 0.857,
+    "seg_recall": 0.800,
+    "seg_mAP50": 0.8404,
+    "seg_mAP50_95": 0.6227,
+    "box_mAP50": 0.887,
+    "speed_ms": 21.7,
+    "ap50_waveguide": 0.778,
+    "ap50_flux": 0.932,
+    "ap50_solder": 0.946
+  },
+  {
+    "model": "yolo11s-seg",
+    "seg_precision": 0.853,
+    "seg_recall": 0.754,
+    "seg_mAP50": 0.8639,
+    "seg_mAP50_95": 0.6438,
+    "box_mAP50": 0.827,
+    "speed_ms": 26.3
+  },
+  {
+    "model": "yolo11m-seg",
+    "seg_precision": 0.857,
+    "seg_recall": 0.800,
+    "seg_mAP50": 0.8854,
+    "seg_mAP50_95": 0.6606,
+    "box_mAP50": 0.887,
+    "speed_ms": 43.5,
+    "ap50_waveguide": 0.778,
+    "ap50_flux": 0.932,
+    "ap50_solder": 0.946
+  }
+]

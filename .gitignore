@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Training runs & model weights
+runs/
+*.pt
+*.pth
+*.onnx
+
+# Data
+data/
+
+# Videos
+*.mp4
+*.avi
+*.mov
+*.MOV
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+wandb/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
