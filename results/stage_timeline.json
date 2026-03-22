@@ -1,0 +1,515 @@
+[
+  {
+    "frame": 0,
+    "sec": 0.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.06,
+    "solder": 0.77,
+    "waveguide": 17.53
+  },
+  {
+    "frame": 30,
+    "sec": 1.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 2.95,
+    "solder": 0.3,
+    "waveguide": 17.98
+  },
+  {
+    "frame": 60,
+    "sec": 2.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 2.93,
+    "solder": 0.0,
+    "waveguide": 18.47
+  },
+  {
+    "frame": 90,
+    "sec": 3.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.0,
+    "solder": 0.48,
+    "waveguide": 17.93
+  },
+  {
+    "frame": 120,
+    "sec": 4.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 2.97,
+    "solder": 0.48,
+    "waveguide": 18.67
+  },
+  {
+    "frame": 150,
+    "sec": 5.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 2.93,
+    "solder": 0.61,
+    "waveguide": 18.44
+  },
+  {
+    "frame": 180,
+    "sec": 6.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 2.96,
+    "solder": 0.76,
+    "waveguide": 18.01
+  },
+  {
+    "frame": 210,
+    "sec": 7.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.05,
+    "solder": 0.87,
+    "waveguide": 17.79
+  },
+  {
+    "frame": 240,
+    "sec": 8.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.13,
+    "solder": 0.96,
+    "waveguide": 17.78
+  },
+  {
+    "frame": 270,
+    "sec": 9.0,
+    "stage": 2,
+    "name": "Плавление припоя",
+    "flux": 3.06,
+    "solder": 0.86,
+    "waveguide": 17.91
+  },
+  {
+    "frame": 300,
+    "sec": 10.0,
+    "stage": 2,
+    "name": "Плавление припоя",
+    "flux": 3.18,
+    "solder": 1.01,
+    "waveguide": 17.76
+  },
+  {
+    "frame": 330,
+    "sec": 11.0,
+    "stage": 2,
+    "name": "Плавление припоя",
+    "flux": 3.28,
+    "solder": 0.88,
+    "waveguide": 17.85
+  },
+  {
+    "frame": 360,
+    "sec": 12.0,
+    "stage": 2,
+    "name": "Плавление припоя",
+    "flux": 3.3,
+    "solder": 0.85,
+    "waveguide": 17.87
+  },
+  {
+    "frame": 390,
+    "sec": 13.0,
+    "stage": 2,
+    "name": "Плавление припоя",
+    "flux": 3.42,
+    "solder": 1.16,
+    "waveguide": 17.83
+  },
+  {
+    "frame": 420,
+    "sec": 14.0,
+    "stage": 2,
+    "name": "Плавление припоя",
+    "flux": 3.54,
+    "solder": 1.17,
+    "waveguide": 18.14
+  },
+  {
+    "frame": 450,
+    "sec": 15.0,
+    "stage": 2,
+    "name": "Плавление припоя",
+    "flux": 3.76,
+    "solder": 1.16,
+    "waveguide": 18.13
+  },
+  {
+    "frame": 480,
+    "sec": 16.0,
+    "stage": 2,
+    "name": "Плавление припоя",
+    "flux": 3.66,
+    "solder": 1.24,
+    "waveguide": 17.98
+  },
+  {
+    "frame": 510,
+    "sec": 17.0,
+    "stage": 2,
+    "name": "Плавление припоя",
+    "flux": 3.36,
+    "solder": 0.86,
+    "waveguide": 17.67
+  },
+  {
+    "frame": 540,
+    "sec": 18.0,
+    "stage": 2,
+    "name": "Плавление припоя",
+    "flux": 3.23,
+    "solder": 0.96,
+    "waveguide": 17.69
+  },
+  {
+    "frame": 570,
+    "sec": 19.0,
+    "stage": 2,
+    "name": "Плавление припоя",
+    "flux": 3.12,
+    "solder": 0.88,
+    "waveguide": 17.49
+  },
+  {
+    "frame": 600,
+    "sec": 20.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.08,
+    "solder": 0.83,
+    "waveguide": 17.83
+  },
+  {
+    "frame": 630,
+    "sec": 21.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.2,
+    "solder": 0.97,
+    "waveguide": 17.47
+  },
+  {
+    "frame": 660,
+    "sec": 22.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.27,
+    "solder": 1.0,
+    "waveguide": 17.88
+  },
+  {
+    "frame": 690,
+    "sec": 23.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.34,
+    "solder": 0.82,
+    "waveguide": 17.75
+  },
+  {
+    "frame": 720,
+    "sec": 24.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.45,
+    "solder": 0.83,
+    "waveguide": 17.61
+  },
+  {
+    "frame": 750,
+    "sec": 25.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.68,
+    "solder": 1.19,
+    "waveguide": 17.99
+  },
+  {
+    "frame": 780,
+    "sec": 26.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.85,
+    "solder": 0.78,
+    "waveguide": 17.92
+  },
+  {
+    "frame": 810,
+    "sec": 27.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 4.19,
+    "solder": 0.83,
+    "waveguide": 18.17
+  },
+  {
+    "frame": 840,
+    "sec": 28.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 4.22,
+    "solder": 0.83,
+    "waveguide": 18.17
+  },
+  {
+    "frame": 870,
+    "sec": 29.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 4.24,
+    "solder": 0.83,
+    "waveguide": 18.34
+  },
+  {
+    "frame": 900,
+    "sec": 30.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 4.32,
+    "solder": 1.24,
+    "waveguide": 18.66
+  },
+  {
+    "frame": 930,
+    "sec": 31.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 4.29,
+    "solder": 0.83,
+    "waveguide": 18.53
+  },
+  {
+    "frame": 960,
+    "sec": 32.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 4.29,
+    "solder": 0.85,
+    "waveguide": 17.95
+  },
+  {
+    "frame": 990,
+    "sec": 33.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 4.25,
+    "solder": 0.85,
+    "waveguide": 17.93
+  },
+  {
+    "frame": 1020,
+    "sec": 34.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.92,
+    "solder": 0.87,
+    "waveguide": 20.36
+  },
+  {
+    "frame": 1050,
+    "sec": 35.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.89,
+    "solder": 0.92,
+    "waveguide": 20.23
+  },
+  {
+    "frame": 1080,
+    "sec": 36.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.49,
+    "solder": 0.86,
+    "waveguide": 21.14
+  },
+  {
+    "frame": 1110,
+    "sec": 37.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.55,
+    "solder": 0.95,
+    "waveguide": 20.8
+  },
+  {
+    "frame": 1140,
+    "sec": 38.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.83,
+    "solder": 0.84,
+    "waveguide": 21.04
+  },
+  {
+    "frame": 1170,
+    "sec": 39.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.91,
+    "solder": 0.75,
+    "waveguide": 19.68
+  },
+  {
+    "frame": 1200,
+    "sec": 40.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.74,
+    "solder": 0.49,
+    "waveguide": 20.7
+  },
+  {
+    "frame": 1230,
+    "sec": 41.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.62,
+    "solder": 0.46,
+    "waveguide": 20.47
+  },
+  {
+    "frame": 1260,
+    "sec": 42.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.39,
+    "solder": 0.42,
+    "waveguide": 17.51
+  },
+  {
+    "frame": 1290,
+    "sec": 43.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.53,
+    "solder": 0.42,
+    "waveguide": 17.82
+  },
+  {
+    "frame": 1320,
+    "sec": 44.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.48,
+    "solder": 0.65,
+    "waveguide": 17.42
+  },
+  {
+    "frame": 1350,
+    "sec": 45.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.62,
+    "solder": 0.46,
+    "waveguide": 18.12
+  },
+  {
+    "frame": 1380,
+    "sec": 46.0,
+    "stage": 1,
+    "name": "Плавление флюса",
+    "flux": 3.61,
+    "solder": 0.76,
+    "waveguide": 20.62
+  },
+  {
+    "frame": 1410,
+    "sec": 47.0,
+    "stage": 3,
+    "name": "Стабилизация",
+    "flux": 3.59,
+    "solder": 1.03,
+    "waveguide": 19.96
+  },
+  {
+    "frame": 1440,
+    "sec": 48.0,
+    "stage": 3,
+    "name": "Стабилизация",
+    "flux": 3.56,
+    "solder": 0.78,
+    "waveguide": 20.64
+  },
+  {
+    "frame": 1470,
+    "sec": 49.0,
+    "stage": 3,
+    "name": "Стабилизация",
+    "flux": 3.43,
+    "solder": 0.74,
+    "waveguide": 17.31
+  },
+  {
+    "frame": 1500,
+    "sec": 50.1,
+    "stage": 3,
+    "name": "Стабилизация",
+    "flux": 3.64,
+    "solder": 0.88,
+    "waveguide": 17.42
+  },
+  {
+    "frame": 1530,
+    "sec": 51.1,
+    "stage": 3,
+    "name": "Стабилизация",
+    "flux": 3.74,
+    "solder": 0.65,
+    "waveguide": 17.16
+  },
+  {
+    "frame": 1560,
+    "sec": 52.1,
+    "stage": 3,
+    "name": "Стабилизация",
+    "flux": 3.61,
+    "solder": 0.83,
+    "waveguide": 16.87
+  },
+  {
+    "frame": 1590,
+    "sec": 53.1,
+    "stage": 3,
+    "name": "Стабилизация",
+    "flux": 3.58,
+    "solder": 0.95,
+    "waveguide": 16.66
+  },
+  {
+    "frame": 1620,
+    "sec": 54.1,
+    "stage": 3,
+    "name": "Стабилизация",
+    "flux": 3.64,
+    "solder": 0.81,
+    "waveguide": 17.07
+  },
+  {
+    "frame": 1650,
+    "sec": 55.1,
+    "stage": 3,
+    "name": "Стабилизация",
+    "flux": 3.58,
+    "solder": 0.82,
+    "waveguide": 16.78
+  },
+  {
+    "frame": 1680,
+    "sec": 56.1,
+    "stage": 3,
+    "name": "Стабилизация",
+    "flux": 3.25,
+    "solder": 0.22,
+    "waveguide": 23.48
+  }
+]

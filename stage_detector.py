@@ -116,6 +116,12 @@ class StageDetector:
         """
         Классифицирует этап на основе текущих площадей и цветов.
 
+        Логика основана на физике процесса индукционной пайки:
+        - Этап 0: Нагрев — флюс ещё не растёкся (малая площадь), припой не виден
+        - Этап 1: Плавление флюса — флюс растекается (площадь растёт), припой мал
+        - Этап 2: Плавление припоя — припой появляется/растёт, флюс может уменьшаться
+        - Этап 3: Стабилизация — площади стабильны, динамика прекратилась
+
         Returns:
             (stage, confidence, details_str)
         """
@@ -128,39 +134,48 @@ class StageDetector:
         flux_saturation = colors["flux_saturation"]
         solder_saturation = colors["solder_saturation"]
 
-        # Динамика площади припоя (растёт ли)
-        solder_growing = self._is_growing("solder")
-        flux_shrinking = self._is_shrinking("flux")
+        # Динамика площадей
+        solder_growing = self._is_growing("solder", window=8, threshold=0.001)
+        flux_growing = self._is_growing("flux", window=8, threshold=0.001)
+        flux_shrinking = self._is_shrinking("flux", window=8, threshold=0.001)
+        solder_stable = self._is_stable("solder", window=10, threshold=0.002)
+        flux_stable = self._is_stable("flux", window=10, threshold=0.002)
 
         # --- Правила определения этапов ---
 
         # Нет сегментации → этап 0 (начало)
-        if flux_area < 0.005 and solder_area < 0.005:
-            return 0, 0.5, "Объекты не обнаружены"
-
-        # Этап 3: Стабилизация
-        # Припой виден, площадь стабильна, яркость снижается
-        if solder_area > 0.02 and not solder_growing and self._is_stable("solder"):
-            return 3, 0.8, f"Припой стабилен ({solder_area:.3f}), не растёт"
-
-        # Этап 2: Плавление припоя
-        # Припой виден и его площадь растёт, яркость высокая
-        if solder_area > 0.01 and (solder_growing or solder_brightness > 150):
-            conf = min(0.95, 0.6 + solder_area * 5)
-            return 2, conf, f"Припой плавится ({solder_area:.3f}), яркость={solder_brightness:.0f}"
-
-        # Этап 1: Плавление флюса
-        # Флюс виден, его яркость высокая (прозрачный/блестящий)
-        if flux_area > 0.01 and flux_brightness > 120:
-            conf = min(0.9, 0.5 + flux_area * 3)
-            return 1, conf, f"Флюс плавится ({flux_area:.3f}), яркость={flux_brightness:.0f}"
+        if flux_area < 0.005 and solder_area < 0.003:
+            return 0, 0.6, "Объекты не обнаружены — предварительный нагрев"
 
         # Этап 0: Предварительный нагрев
-        # Флюс виден, но матовый (низкая яркость)
-        if flux_area > 0.005:
-            return 0, 0.7, f"Флюс виден ({flux_area:.3f}), матовый, яркость={flux_brightness:.0f}"
+        # Флюс виден, но ещё не растекается (малая площадь < 2.5%)
+        # Припой почти не виден
+        if flux_area < 0.025 and solder_area < 0.005:
+            return 0, 0.7, f"Флюс мал ({flux_area:.3f}), припой мал ({solder_area:.3f}) — нагрев"
 
-        return 0, 0.5, "По умолчанию: предварительный нагрев"
+        # Этап 3: Стабилизация
+        # И флюс, и припой стабильны, процесс завершается
+        # Проверяем в конце видео — площади перестали меняться
+        if (flux_stable and solder_stable and
+                self.frame_count > 30 and flux_area > 0.02):
+            return 3, 0.8, f"Площади стабильны: flux={flux_area:.3f}, solder={solder_area:.3f}"
+
+        # Этап 2: Плавление припоя
+        # Припой растёт ИЛИ значительный по площади (>1%)
+        # + флюс уменьшается или стабилен (уже расплавился)
+        if solder_growing or (solder_area > 0.01 and not flux_growing):
+            conf = min(0.95, 0.6 + solder_area * 10)
+            return 2, conf, f"Припой: {solder_area:.3f} (растёт={solder_growing}), flux={flux_area:.3f}"
+
+        # Этап 1: Плавление флюса
+        # Флюс растекается (площадь > 2.5%) и/или растёт
+        if flux_area > 0.025 or flux_growing:
+            conf = min(0.9, 0.5 + flux_area * 5)
+            detail = "растёт" if flux_growing else "расплавлен"
+            return 1, conf, f"Флюс {detail} ({flux_area:.3f}), яркость={flux_brightness:.0f}"
+
+        # По умолчанию: предварительный нагрев
+        return 0, 0.5, f"По умолчанию: flux={flux_area:.3f}, solder={solder_area:.3f}"
 
     def _is_growing(self, class_name, window=10, threshold=0.002):
         """Проверяет, растёт ли площадь класса за последние N кадров."""

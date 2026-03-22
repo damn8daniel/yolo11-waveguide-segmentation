@@ -1,0 +1,9 @@
+<View>
+  <Image name="image" value="$image" zoom="true" zoomControl="true" rotateControl="false"/>
+
+  <PolygonLabels name="label" toName="image" strokeWidth="3" pointSize="small" opacity="0.5">
+    <Label value="waveguide" background="#FFD700"/>
+    <Label value="flux" background="#00CED1"/>
+    <Label value="solder" background="#32CD32"/>
+  </PolygonLabels>
+</View>

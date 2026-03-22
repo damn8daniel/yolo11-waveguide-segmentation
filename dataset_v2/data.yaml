@@ -1,0 +1,10 @@
+path: /Users/damn8daniel/Desktop/НИР/ДаняБоряНир/dataset_v2
+train: images/train
+val: images/val
+
+names:
+  0: waveguide
+  1: flux
+  2: solder
+
+nc: 3

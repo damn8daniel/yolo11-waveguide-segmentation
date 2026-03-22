@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Waveguide Annotation Tool</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, sans-serif; background: #1a1a2e; color: #eee; display: flex; height: 100vh; }
+.sidebar { width: 320px; padding: 16px; background: #16213e; overflow-y: auto; }
+.sidebar h2 { margin-bottom: 12px; color: #e94560; }
+.main { flex: 1; display: flex; flex-direction: column; padding: 8px; }
+canvas { background: #0f3460; cursor: crosshair; border: 2px solid #533483; border-radius: 4px; }
+.controls { display: flex; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+button { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; }
+.btn-class { color: #000; }
+.btn-class.active { outline: 3px solid #fff; outline-offset: 2px; }
+.btn-waveguide { background: #FFD700; }
+.btn-flux { background: #00CED1; }
+.btn-solder { background: #32CD32; }
+.btn-action { background: #533483; color: #fff; }
+.btn-action:hover { background: #e94560; }
+.btn-nav { background: #0f3460; color: #fff; border: 1px solid #533483; }
+.btn-nav:hover { background: #533483; }
+.status { padding: 8px; background: #0f3460; border-radius: 4px; margin: 8px 0; font-size: 13px; }
+.frame-list { margin-top: 12px; }
+.frame-item { padding: 6px 10px; margin: 2px 0; border-radius: 4px; cursor: pointer; font-size: 13px; }
+.frame-item:hover { background: #1a1a2e; }
+.frame-item.current { background: #533483; }
+.frame-item.annotated { border-left: 3px solid #32CD32; }
+.frame-item.annotated::after { content: " ✓"; color: #32CD32; }
+.info { font-size: 12px; color: #888; margin: 8px 0; line-height: 1.6; }
+.progress { background: #0f3460; border-radius: 4px; height: 24px; margin: 8px 0; overflow: hidden; }
+.progress-bar { background: #e94560; height: 100%; transition: width 0.3s; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
+.export-area { margin-top: 12px; }
+textarea { width: 100%; height: 80px; background: #1a1a2e; color: #eee; border: 1px solid #533483; border-radius: 4px; padding: 8px; font-size: 11px; font-family: monospace; }
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <h2>Annotation Tool</h2>
+  <div class="info">
+    <b>Инструкция:</b><br>
+    1. Выбери класс (waveguide/flux/solder)<br>
+    2. Обведи объект точками на фото (клик = точка)<br>
+    3. Нажми "Замкнуть полигон" или клик рядом с первой точкой<br>
+    4. Повтори для остальных классов<br>
+    5. Нажми → для следующего кадра<br>
+    <br>
+    <b>Waveguide</b> = стенки + полость (маленький прямоугольник)<br>
+    <b>Flux</b> = белый порошок слева и справа<br>
+    <b>Solder</b> = U-форма снизу
+  </div>
+
+  <div class="progress">
+    <div class="progress-bar" id="progressBar" style="width: 0%">0/40</div>
+  </div>
+
+  <div class="frame-list" id="frameList"></div>
+
+  <div class="export-area">
+    <button class="btn-action" onclick="exportAll()" style="width:100%;margin-top:8px;">Экспорт в YOLO формат</button>
+    <button class="btn-action" onclick="saveToFile()" style="width:100%;margin-top:4px;">Сохранить JSON</button>
+    <textarea id="exportOutput" placeholder="Результат экспорта появится здесь..."></textarea>
+  </div>
+</div>
+
+<div class="main">
+  <div class="controls">
+    <button class="btn-class btn-waveguide" id="btnWaveguide" onclick="setClass('waveguide')">Waveguide</button>
+    <button class="btn-class btn-flux" id="btnFlux" onclick="setClass('flux')">Flux</button>
+    <button class="btn-class btn-solder" id="btnSolder" onclick="setClass('solder')">Solder</button>
+    <button class="btn-action" onclick="closePolygon()">Замкнуть полигон</button>
+    <button class="btn-action" onclick="undoPoint()">Отменить точку</button>
+    <button class="btn-action" onclick="deleteLastPoly()">Удалить последний</button>
+    <button class="btn-action" onclick="clearFrame()">Очистить всё</button>
+    <button class="btn-nav" onclick="prevFrame()">← Назад</button>
+    <button class="btn-nav" onclick="nextFrame()">Вперёд →</button>
+  </div>
+  <div class="status" id="status">Загрузка...</div>
+  <canvas id="canvas"></canvas>
+</div>
+
+<script>
+const FRAMES_DIR = 'frames/';
+let frames = [];
+let currentIdx = 0;
+let currentClass = 'waveguide';
+let currentPoints = [];
+let annotations = {}; // frameIdx -> [{class, points}]
+let img = new Image();
+let canvas, ctx;
+let scale = 1;
+let offsetX = 0, offsetY = 0;
+
+// Frame list - hardcoded for reliability
+async function loadFrames() {
+  frames = ["MVI_6265_MOV-0000_jpg.rf.88deb6daaf538a9c5a4da89486b6448e.jpg","MVI_6265_MOV-0004_jpg.rf.ff2840930d68945bb14f050120bc2ae6.jpg","MVI_6265_MOV-0008_jpg.rf.16ae098548df07e2b1b5a165d5905d4e.jpg","MVI_6265_MOV-0013_jpg.rf.b156555293df4e21cdc1011c35d777bc.jpg","MVI_6265_MOV-0016_jpg.rf.9cec8d485c5661f89330115fdb34e515.jpg","MVI_6265_MOV-0018_jpg.rf.1da649e6a94a25ea725a46b1803e6861.jpg","MVI_6265_MOV-0020_jpg.rf.b1c7df7c6a2e92ec7541142c045ada38.jpg","MVI_6265_MOV-0027_jpg.rf.40a6d72a7d648b1443da33eae54164a8.jpg","MVI_6265_MOV-0028_jpg.rf.53f03ebdc95ce4531dfa22d57b193d1b.jpg","MVI_6265_MOV-0030_jpg.rf.ef40fb8e06a989b8343e239aafebc016.jpg","MVI_6268_MOV-0000_jpg.rf.55ebecbbd6439d4193ebd6e7b7a86725.jpg","MVI_6268_MOV-0002_jpg.rf.35803e3618f69090a640d60b82073818.jpg","MVI_6268_MOV-0002_jpg.rf.88eaf486347aa031755d5cadded2a707.jpg","MVI_6268_MOV-0005_jpg.rf.89f23872dffa9e326b2f5d0c345dbcf0.jpg","MVI_6268_MOV-0007_jpg.rf.d2a28e2bfb93bd29092232b9827b95f6.jpg","MVI_6268_MOV-0011_jpg.rf.41d6fa2d24bc0e6f27bcb71fd77ff7fb.jpg","MVI_6268_MOV-0015_jpg.rf.48e6d10eeb352034c3872bc41b66ba71.jpg","MVI_6268_MOV-0018_jpg.rf.b0244313503389b5f4b63ef6681b6367.jpg","MVI_6268_MOV-0019_jpg.rf.ae72e7a09b2874ce4f0ba4f5efc85fc0.jpg","MVI_6268_MOV-0024_jpg.rf.076b2fd5530fcdfd5f76120eb84847ca.jpg","MVI_6270_MOV-0000_jpg.rf.9b3bc6323f057719b96e5781bc405ea7.jpg","MVI_6270_MOV-0002_jpg.rf.9bca7cb37e2583aae95bd4d6836a4710.jpg","MVI_6270_MOV-0003_jpg.rf.ff1ba9ac46064e0a2de43cbcb56084a8.jpg","MVI_6270_MOV-0008_jpg.rf.6a0436a536ab5c2b6d19c3d838039ac8.jpg","MVI_6270_MOV-0012_jpg.rf.1ad5e870c326ae2dae1d138795ba1754.jpg","MVI_6270_MOV-0015_jpg.rf.c7c4332e384f0b02b930507557b7ccd7.jpg","MVI_6270_MOV-0016_jpg.rf.92140d11de9b3a9ebc1e784c238eef0f.jpg","MVI_6270_MOV-0020_jpg.rf.a425da581d9ef8b23f455e929f104ed7.jpg","MVI_6270_MOV-0025_jpg.rf.1e7155508f689244ec5938bc1aa18240.jpg","MVI_6270_MOV-0029_jpg.rf.01f86a8983cf9ccdb1f1c378a457ffcb.jpg","MVI_6273_MOV-0000_jpg.rf.13d27aa184fdf65c73a4a215a4c60221.jpg","MVI_6273_MOV-0001_jpg.rf.295578e95ed24331d45313f54324d96a.jpg","MVI_6273_MOV-0009_jpg.rf.3aee9bc3d586bbb4dcda77de9be8ff0b.jpg","MVI_6273_MOV-0013_jpg.rf.018c867928ac979dd4ddae55ecc5c4d5.jpg","MVI_6273_MOV-0016_jpg.rf.31f315ffb96718d5974d453acb53d02f.jpg","MVI_6273_MOV-0021_jpg.rf.0b2ff1dab1e3820025129ad7daa49527.jpg","MVI_6273_MOV-0028_jpg.rf.531fdb5ae88c246e6356e0a599af4c75.jpg","MVI_6273_MOV-0032_jpg.rf.388498c63f9ab64ca87cb7b8f17375cb.jpg","MVI_6273_MOV-0037_jpg.rf.b7114684120b9ee1b880fa317a720c5b.jpg","MVI_6273_MOV-0038_jpg.rf.87397476965af5e6663e9b039d6ee183.jpg"];
+
+  // Load saved annotations
+  const saved = localStorage.getItem('waveguide_annotations');
+  if (saved) {
+    annotations = JSON.parse(saved);
+  }
+
+  updateFrameList();
+  loadFrame(0);
+}
+
+function updateFrameList() {
+  const list = document.getElementById('frameList');
+  list.innerHTML = '';
+  frames.forEach((f, i) => {
+    const div = document.createElement('div');
+    div.className = 'frame-item' + (i === currentIdx ? ' current' : '') + (annotations[i] && annotations[i].length > 0 ? ' annotated' : '');
+    div.textContent = `${i + 1}. ${f.substring(0, 25)}...`;
+    div.onclick = () => loadFrame(i);
+    list.appendChild(div);
+  });
+  updateProgress();
+}
+
+function updateProgress() {
+  const done = Object.keys(annotations).filter(k => annotations[k] && annotations[k].length > 0).length;
+  const bar = document.getElementById('progressBar');
+  bar.style.width = (done / frames.length * 100) + '%';
+  bar.textContent = `${done}/${frames.length}`;
+}
+
+function loadFrame(idx) {
+  currentIdx = idx;
+  currentPoints = [];
+  document.getElementById('status').textContent = `Загрузка кадра ${idx + 1}/${frames.length}...`;
+  img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    fitCanvas();
+    draw();
+    updateFrameList();
+    document.getElementById('status').textContent = `Кадр ${idx + 1}/${frames.length}: ${frames[idx].substring(0, 30)}... | Класс: ${currentClass}`;
+  };
+  img.onerror = (e) => {
+    console.error('Image load error:', FRAMES_DIR + frames[idx], e);
+    document.getElementById('status').textContent = `ОШИБКА загрузки: ${frames[idx]} — попробуйте http://localhost:8888/annotator.html`;
+  };
+  const src = FRAMES_DIR + frames[idx];
+  console.log('Loading image:', src);
+  img.src = src;
+}
+
+function fitCanvas() {
+  canvas = document.getElementById('canvas');
+  ctx = canvas.getContext('2d');
+  const maxW = canvas.parentElement.clientWidth - 16;
+  const maxH = window.innerHeight - 120;
+  scale = Math.min(maxW / img.width, maxH / img.height);
+  canvas.width = img.width * scale;
+  canvas.height = img.height * scale;
+}
+
+function draw() {
+  if (!ctx || !img || !img.complete || img.naturalWidth === 0) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+  // Draw saved polygons
+  const polys = annotations[currentIdx] || [];
+  polys.forEach(poly => {
+    drawPolygon(poly.points, poly.class, true);
+  });
+
+  // Draw current points
+  if (currentPoints.length > 0) {
+    drawPolygon(currentPoints, currentClass, false);
+  }
+}
+
+const COLORS = {
+  waveguide: { fill: 'rgba(255,215,0,0.3)', stroke: '#FFD700' },
+  flux: { fill: 'rgba(0,206,209,0.3)', stroke: '#00CED1' },
+  solder: { fill: 'rgba(50,205,50,0.3)', stroke: '#32CD32' },
+};
+
+function drawPolygon(points, cls, closed) {
+  if (points.length === 0) return;
+  const c = COLORS[cls];
+  ctx.beginPath();
+  ctx.moveTo(points[0][0] * scale, points[0][1] * scale);
+  for (let i = 1; i < points.length; i++) {
+    ctx.lineTo(points[i][0] * scale, points[i][1] * scale);
+  }
+  if (closed) {
+    ctx.closePath();
+    ctx.fillStyle = c.fill;
+    ctx.fill();
+  }
+  ctx.strokeStyle = c.stroke;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Draw points
+  points.forEach((p, i) => {
+    ctx.beginPath();
+    ctx.arc(p[0] * scale, p[1] * scale, i === 0 ? 6 : 4, 0, Math.PI * 2);
+    ctx.fillStyle = i === 0 ? '#fff' : c.stroke;
+    ctx.fill();
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  });
+
+  // Label
+  if (closed && points.length > 0) {
+    const cx = points.reduce((s, p) => s + p[0], 0) / points.length;
+    const cy = points.reduce((s, p) => s + p[1], 0) / points.length;
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillStyle = c.stroke;
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 3;
+    ctx.strokeText(cls, cx * scale - 20, cy * scale);
+    ctx.fillText(cls, cx * scale - 20, cy * scale);
+  }
+}
+
+// Init canvas on DOM ready
+canvas = document.getElementById('canvas');
+ctx = canvas.getContext('2d');
+canvas.width = 800;
+canvas.height = 600;
+canvas.addEventListener('click', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  // Account for CSS scaling: canvas internal size vs displayed size
+  const cssScaleX = canvas.width / rect.width;
+  const cssScaleY = canvas.height / rect.height;
+  const canvasX = (e.clientX - rect.left) * cssScaleX;
+  const canvasY = (e.clientY - rect.top) * cssScaleY;
+  // Convert from canvas coords to image coords
+  const x = canvasX / scale;
+  const y = canvasY / scale;
+
+  // Check if clicking near first point to close
+  if (currentPoints.length >= 3) {
+    const dx = currentPoints[0][0] - x;
+    const dy = currentPoints[0][1] - y;
+    if (Math.sqrt(dx*dx + dy*dy) < 15) {
+      closePolygon();
+      return;
+    }
+  }
+
+  currentPoints.push([Math.round(x), Math.round(y)]);
+  draw();
+});
+
+function setClass(cls) {
+  // Auto-close if there are pending points
+  if (currentPoints.length >= 3) {
+    closePolygon();
+  } else {
+    currentPoints = [];
+  }
+  currentClass = cls;
+  document.querySelectorAll('.btn-class').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn' + cls.charAt(0).toUpperCase() + cls.slice(1)).classList.add('active');
+  document.getElementById('status').textContent = `Кадр ${currentIdx + 1}/${frames.length} | Класс: ${currentClass}`;
+  draw();
+}
+
+function closePolygon() {
+  if (currentPoints.length < 3) return;
+  if (!annotations[currentIdx]) annotations[currentIdx] = [];
+  annotations[currentIdx].push({ class: currentClass, points: [...currentPoints] });
+  currentPoints = [];
+  saveAnnotations();
+  draw();
+  updateFrameList();
+}
+
+function undoPoint() {
+  currentPoints.pop();
+  draw();
+}
+
+function deleteLastPoly() {
+  if (annotations[currentIdx] && annotations[currentIdx].length > 0) {
+    annotations[currentIdx].pop();
+    saveAnnotations();
+    draw();
+    updateFrameList();
+  }
+}
+
+function clearFrame() {
+  annotations[currentIdx] = [];
+  currentPoints = [];
+  saveAnnotations();
+  draw();
+  updateFrameList();
+}
+
+function prevFrame() {
+  if (currentPoints.length >= 3) closePolygon();
+  if (currentIdx > 0) loadFrame(currentIdx - 1);
+}
+
+function nextFrame() {
+  if (currentPoints.length >= 3) closePolygon();
+  if (currentIdx < frames.length - 1) loadFrame(currentIdx + 1);
+}
+
+function saveAnnotations() {
+  localStorage.setItem('waveguide_annotations', JSON.stringify(annotations));
+}
+
+function exportAll() {
+  // Export in YOLO polygon format
+  let output = '';
+  let count = 0;
+  Object.keys(annotations).forEach(idx => {
+    const polys = annotations[idx];
+    if (!polys || polys.length === 0) return;
+    const fname = frames[idx];
+    output += `# ${fname}\n`;
+    polys.forEach(poly => {
+      const classId = { waveguide: 0, flux: 1, solder: 2 }[poly.class];
+      const coords = poly.points.map(p => `${(p[0] / img.width).toFixed(6)} ${(p[1] / img.height).toFixed(6)}`).join(' ');
+      output += `${classId} ${coords}\n`;
+    });
+    output += '\n';
+    count++;
+  });
+  document.getElementById('exportOutput').value = `# Annotated ${count} frames\n\n${output}`;
+}
+
+function saveToFile() {
+  const data = JSON.stringify(annotations, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'annotations.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === 'd') nextFrame();
+  if (e.key === 'ArrowLeft' || e.key === 'a') prevFrame();
+  if (e.key === '1') setClass('waveguide');
+  if (e.key === '2') setClass('flux');
+  if (e.key === '3') setClass('solder');
+  if (e.key === 'Enter') closePolygon();
+  if (e.key === 'z' && e.ctrlKey) undoPoint();
+  if (e.key === 'Escape') { currentPoints = []; draw(); }
+});
+
+// Init — load frames first, then set class
+loadFrames().then(() => {
+  setClass('waveguide');
+});
+</script>
+</body>
+</html>
